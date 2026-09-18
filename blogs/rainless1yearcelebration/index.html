@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一周年纪念 - 语晴喵</title>
+<link rel="icon" href="/main.ico">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: #e8e3d9 url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4cfc5' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  min-height: 100vh;
+  padding: 30px 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* 顶部导航 */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid #ddd;
+}
+
+.back-btn {
+  color: #555;
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-btn:hover { color: #e91e63; }
+
+.top-bar-right {
+  display: flex;
+  gap: 15px;
+  font-size: 13px;
+}
+.top-bar-right a {
+  color: #666;
+  text-decoration: none;
+}
+.top-bar-right a:hover { color: #e91e63; }
+
+/* 主内容区 */
+.main-wrap {
+  background: #fff;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.article-area {
+  padding: 40px 50px;
+}
+
+.article-header {
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed #ddd;
+  margin-bottom: 30px;
+}
+
+.article-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  font-size: 13px;
+  color: #999;
+}
+.meta-author a {
+  color: #e91e63;
+  text-decoration: none;
+}
+.meta-author a:hover { text-decoration: underline; }
+
+/* 正文 */
+.article-body {
+  font-size: 16px;
+  line-height: 2;
+  color: #444;
+}
+.article-body p {
+  margin-bottom: 18px;
+}
+
+/* GIF 行 */
+.gif-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+.gif-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f0f0f0;
+}
+
+/* 图片 */
+.post-image-wrap {
+  text-align: center;
+  margin: 20px 0;
+}
+.post-img {
+  max-width: 100%;
+  border-radius: 8px;
+  background: #f0f0f0;
+  min-height: 200px;
+}
+.img-caption {
+  font-size: 13px;
+  color: #888;
+  margin-top: 8px;
+}
+
+/* 视频 */
+.video-wrap {
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.video-wrap video {
+  width: 100%;
+  display: block;
+  background: #000;
+}
+
+/* ===== 剧透遮罩核心样式 ===== */
+.spoiler-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.spoiler-wrap.block {
+  display: block;
+}
+.spoiler-wrap .spoiler-content {
+  display: block;
+  filter: blur(8px);
+  transition: filter 0.3s ease;
+}
+.spoiler-wrap .spoiler-mask {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.spoiler-wrap .spoiler-hint {
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  padding: 8px 20px;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.spoiler-wrap:hover .spoiler-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+.spoiler-wrap.revealed .spoiler-mask {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.spoiler-wrap.revealed .spoiler-content {
+  filter: blur(0);
+}
+
+/* 文字剧透块内边距 */
+.spoiler-text-box {
+  padding: 18px 20px;
+  background: #faf3f5;
+  border: 1px dashed #e91e63;
+  border-radius: 8px;
+  color: #555;
+}
+
+/* 称呼 */
+.salutation {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin: 10px 0 15px;
+}
+
+/* 底部动作 */
+.article-footer {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px dashed #ddd;
+}
+.article-actions {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #888;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.action-item:hover { color: #e91e63; }
+.action-item.liked { color: #e91e63; }
+
+/* 响应式 */
+@media (max-width: 600px) {
+  .article-area { padding: 20px; }
+  .gif-img { width: 90px; height: 90px; }
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="container">
+  <div class="top-bar">
+    <a href="/" class="back-btn">&larr; 返回首页</a>
+    <div class="top-bar-right">
+      <a href="#">我的空间</a>
+      <a href="#">设置</a>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="article-area">
+      <div class="article-header">
+        <h1 class="article-title">小猫一周年快乐呀</h1>
+        <div class="article-meta">
+          <span class="meta-author"><a href="#">千ni姐姐</a></span>
+          <span>2026年9月19日</span>
+        </div>
+      </div>
+
+      <div class="article-body">
+        <!-- 顶部GIF -->
+        <div class="gif-row">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+        </div>
+
+        <p style="color:#888;font-size:14px;text-align:center;">（有视频，记得开声音）</p>
+
+        <div class="salutation">小语语晴喵：</div>
+
+        <p>晚上好小猫！欢迎来到我的网站！！</p>
+
+        <p>恭喜你达成【api调用01开始】--【api调用01结束】个粉丝！要再接再厉，要加油喵！！</p>
+
+        <p>盼望了好久好久的周年庆终于到啦，不知道你现在的心情如何喵？我倒是怪激动的，至于原因嘛……你过会就知道啦，嘿嘿</p>
+
+        <p>每次一回想起来都感觉，我们已经认识了好久好久好久……</p>
+        <p>但回头一看，也不过三百来天而已！</p>
+
+        <div class="post-image-wrap">
+          <img src="image01.jpg" alt="图片01" class="post-img">
+          <div class="img-caption">△ 300天的时候看到了没截图QAQ</div>
+        </div>
+
+        <p>你之前播的都好晚好晚，我也睡得好晚好晚，有一大段时间我都是在你的陪伴下睡觉的</p>
+
+        <p>小猫一直都好温柔好温柔！不管是歌杂还是瓦瓦，我都感觉睡得特别香，睡醒之后也会特别特别想你</p>
+        <p>虽然真的播通宵的时候，我会很心疼小猫的！</p>
+        <p>不过最近这段时间，我打算调整一下睡眠啦，以后太晚播我就跟不到咯，果咩纳塞小猫desu！</p>
+        <br>
+
+        <p>说到瓦瓦，其实我真的很喜欢和小猫一起玩</p>
+        <p>我本身的性格就……有点孤僻，所以在粥里，要是没有人和我一块玩，我宁愿自己去打单三被踹也不会想匹队友</p>
+        <p>所以在瓦瓦里，我根本就不想自己出去单排！</p>
+        <p>只有你在的时候，我才能放得开，而且感觉直播间的大家都对我比较宽容的样子！哪怕是菜菜的也不会压力，虽然我自己会有点内疚啦</p>
+        <p>总归来说，也是非常非常开心的！</p>
+        <p>不过，因为猫播的晚晚的，我的胆子也没那么肥嘟嘟，不敢熬大夜打游戏，所以就一直没玩啦</p>
+        <p>猫猫如果随机掉落瓦瓦，我很乐意也来上两把喵</p>
+        <p>只要不嫌我菜就好🥺</p>
+
+        <p>找不到小猫的五杀切片啦，那就看看这个四杀的吧</p>
+
+        <div class="video-wrap">
+          <video src="video04.mp4" controls preload="auto" playsinline style="background:#000;"></video>
+        </div>
+        <br>
+
+        <p>以及以及小猫的猫猫狗狗窝！什么时候复播人森！！！</p>
+        <p>我要看姐妹丼！还要看 Rainless Rainy 小小 小布 普洱 吸萍 Black White 等等等等所有的好宝宝！！！！！！</p>
+        <p>多么可爱的小朋友们…虽然谈来谈去早就乱成一团了喵</p>
+        <p>但至少…我们接近过……</p>
+        <br>
+
+        <p>一点点感情线：</p>
+
+        <!-- ===== 文字剧透块 ===== -->
+        <div class="spoiler-wrap block" data-hint="一点点心里话" style="border-radius: 8px;">
+          <div class="spoiler-content spoiler-text-box">
+            <p style="margin-bottom:12px;">小猫小猫，我喜欢你！</p>
+            <p style="margin-bottom:12px;">但是我知道的哦，小猫是虚拟主播，小猫的未来是万舰的星辰大海！</p>
+            <p style="margin-bottom:12px;">所以，我不应该投入那么多感情到这里，这会给我，给猫带来困扰的喵</p>
+            <p style="margin-bottom:12px;">但人就是这样嘛，会作，会冲动，会有莫名其妙心动……</p>
+            <p style="margin-bottom:12px;">所以！请不要管我的想法，如果我给你带来了困扰，记得一定要和我说哦</p>
+            <p style="margin-bottom:12px;">请小语语晴喵先过好自己的生活喵！</p>
+            <p style="margin-bottom:12px;">有事也可以来找我的咪</p>
+            <p style="margin-bottom:0;">（打到这里脑子都乱了喵</p>
+          </div>
+          <div class="spoiler-mask" style="background: rgba(100, 30, 90, 0.92);">
+            <span class="spoiler-hint">一点点心里话，可以现在点开看，也可以回头自己偷偷看哦</span>
+          </div>
+        </div>
+        <br>
+
+        <p>最后呢，其实，心里一直有好多好多想跟你说的，但每每手一放到键盘上，又不知从何说起</p>
+        <p>怎么已经0点了hhhh</p>
+        <p>总之，祝你的直播生涯越来越好，一路长虹！</p>
+        <br>
+
+        <p>最最最后，来玩一点简单的小游戏吧</p>
+        <p>我在我的网站里藏了一个神秘小代码，如果能把它发给姐姐的QQ，或许会有神秘的礼物出现哦！</p>
+        <p>不难找哒！开始吧！</p>
+
+        <!-- 神秘小代码占位：把要藏的代码写在这条注释里，语晴查看网页源代码即可找到 -->
+        <!-- SECRET_CODE_PLACEHOLDER -->
+
+        <!-- 底部GIF -->
+        <div class="gif-row">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+        </div>
+      </div>
+
+      <div class="article-footer">
+        <div class="article-actions">
+          <div class="action-item" onclick="this.classList.toggle('liked');">
+            <span>&#10084;&#65039;</span>
+            <span>0</span>
+          </div>
+          <div class="action-item">
+            <span>&#11088;</span>
+            <span>收藏</span>
+          </div>
+          <div class="action-item">
+            <span>&#8599;&#65039;</span>
+            <span>分享</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========== 1. 剧透遮罩 ========== */
+(function() {
+  document.addEventListener('click', function(e) {
+    const wrap = e.target.closest('.spoiler-wrap');
+    if (!wrap || wrap.classList.contains('revealed')) return;
+    wrap.classList.add('revealed');
+    const video = wrap.querySelector('video');
+    if (video) {
+      video.play().catch(function(){});
+      video.addEventListener('pause', function() {
+        if (!video.ended && video.currentTime > 0) video.play().catch(function(){});
+      });
+    }
+  });
+  document.addEventListener('selectstart', function(e) {
+    const wrap = e.target.closest('.spoiler-wrap');
+    if (wrap && !wrap.classList.contains('revealed')) e.preventDefault();
+  });
+})();
+
+/* ========== 2. B站粉丝数 API（双源 fallback） ========== */
+(function() {
+  const CONFIG = {
+    uid:         '在此填入语晴Rainless的B站UID',   // ← 替换成语晴Rainless的真实UID
+    refreshSec:  30,
+    startMark:   '【api调用01开始】',
+    endMark:     '【api调用01结束】',
+    proxyUrl:    '/api/bili/fans?vmid=',
+    directUrl:   'https://api.bilibili.com/x/relation/stat?vmid='
+  };
+
+  function injectLiveSpan() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while (node = walker.nextNode()) {
+      const t = node.textContent;
+      if (t.includes(CONFIG.startMark) && t.includes(CONFIG.endMark)) {
+        const text   = node.textContent;
+        const s      = text.indexOf(CONFIG.startMark);
+        const e      = text.indexOf(CONFIG.endMark) + CONFIG.endMark.length;
+        const before = text.slice(0, s);
+        const after  = text.slice(e);
+        const parent = node.parentNode;
+
+        if (before) parent.insertBefore(document.createTextNode(before), node);
+
+        const live = document.createElement('span');
+        live.id = 'bili-fan-live';
+        live.style.color = '#00a1d6';
+        live.style.fontWeight = '600';
+        live.textContent = '加载中…';
+        parent.insertBefore(live, node);
+
+        if (after) parent.insertBefore(document.createTextNode(after), node);
+        parent.removeChild(node);
+
+        console.log('[BiliFan] 已注入 span');
+        return live;
+      }
+    }
+    console.error('[BiliFan] 未找到标记文本');
+    return null;
+  }
+
+  async function fetchFans() {
+    const ts = Date.now();
+    const proxy = CONFIG.proxyUrl + CONFIG.uid + '&_t=' + ts;
+    const direct = CONFIG.directUrl + CONFIG.uid + '&_t=' + ts;
+
+    try {
+      console.log('[BiliFan] 尝试代理:', proxy);
+      const res = await fetch(proxy, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.code === 0) return data.data.follower;
+        throw new Error('代理返回 code=' + data.code);
+      }
+      if (res.status === 404) {
+        console.warn('[BiliFan] 代理 404，fallback 直连 B 站');
+      } else {
+        throw new Error('代理 HTTP ' + res.status);
+      }
+    } catch (err) {
+      console.warn('[BiliFan] 代理失败:', err.message);
+    }
+
+    try {
+      console.log('[BiliFan] 尝试直连:', direct);
+      const res = await fetch(direct, {
+        cache: 'no-store',
+        headers: {
+          'Referer': 'https://space.bilibili.com',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+      if (!res.ok) throw new Error('直连 HTTP ' + res.status);
+      const data = await res.json();
+      if (data.code === 0) return data.data.follower;
+      throw new Error('直连返回 code=' + data.code);
+    } catch (err) {
+      console.error('[BiliFan] 直连也失败:', err.message);
+      throw err;
+    }
+  }
+
+  function updateSpan(span, fans) {
+    span.textContent = '恭喜你达成' + fans + '个粉丝！要再接再厉，要加油喵！！';
+    console.log('[BiliFan] 更新成功:', fans);
+  }
+
+  async function tick(span) {
+    try {
+      const fans = await fetchFans();
+      updateSpan(span, fans);
+    } catch (err) {
+      const span = document.getElementById('bili-fan-live');
+      if (span) span.textContent = '粉丝数获取失败';
+    }
+  }
+
+  const span = injectLiveSpan();
+  if (!span) return;
+
+  setTimeout(() => tick(span), 300);
+  let timer = setInterval(() => tick(span), CONFIG.refreshSec * 1000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearInterval(timer);
+      timer = null;
+    } else {
+      tick(span);
+      if (!timer) timer = setInterval(() => tick(span), CONFIG.refreshSec * 1000);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
