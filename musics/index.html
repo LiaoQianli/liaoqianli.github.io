@@ -26,8 +26,9 @@ body {
 	<div class="contentborder1">
 		<div id="loadedContent" class="content1">
 		<script src="/javascript/fetchData.js"></script>
+	<script src="/javascript/listLoader.js"></script>
 		<script>
-			fetchData('songs.html');
+			loadListing({dirsOnly:true, fallback:'songs.html'});
 		</script>
 		</div>
 	</div>
