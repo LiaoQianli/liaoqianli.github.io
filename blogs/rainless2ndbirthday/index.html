@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<!--
+  语晴 2nd birthday 页面
+  参考：/blogs/rainless1yearcelebration/index.html（2026-09-19 上线版）
+  2026-11-15 建骨架，2026-11-16 填正文上线，样式与交互沿用参考页。
+  与参考页的差异：
+    1. 粉丝数脚本只把数字写进占位 span，不再重复整句（参考页线上出现「恭喜你达成恭喜你达成786个粉丝…个粉丝…」）。
+    2. 正文未使用粉丝数标记时脚本静默跳过，不报错、不空转。
+    3. 新增行内剧透 .spoiler-inline（点击揭开），用于正文里 ||包住的句子。
+    4. 收藏/分享改为点击复制本页链接；爱心初始数 1117。
+  目录名按正确拼写 rainless2ndbirthday，对应 https://www.liaoqianli.uk/blogs/rainless2ndbirthday/
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生日快乐~ - 语晴喵</title>
+<link rel="icon" href="/main.ico">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: #e8e3d9 url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4cfc5' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  min-height: 100vh;
+  padding: 30px 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* 顶部导航 */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid #ddd;
+}
+
+.back-btn {
+  color: #555;
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-btn:hover { color: #e91e63; }
+
+.top-bar-right {
+  display: flex;
+  gap: 15px;
+  font-size: 13px;
+}
+.top-bar-right a {
+  color: #666;
+  text-decoration: none;
+}
+.top-bar-right a:hover { color: #e91e63; }
+
+/* 主内容区 */
+.main-wrap {
+  background: #fff;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.article-area {
+  padding: 40px 50px;
+}
+
+.article-header {
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed #ddd;
+  margin-bottom: 30px;
+}
+
+.article-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  font-size: 13px;
+  color: #999;
+}
+.meta-author a {
+  color: #e91e63;
+  text-decoration: none;
+}
+.meta-author a:hover { text-decoration: underline; }
+
+/* 正文 */
+.article-body {
+  font-size: 16px;
+  line-height: 2;
+  color: #444;
+}
+.article-body p {
+  margin-bottom: 18px;   /* 组内行距，与一周年页一致 */
+}
+
+/* GIF 行 */
+.gif-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+.gif-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f0f0f0;
+}
+
+/* 图片 */
+.post-image-wrap {
+  text-align: center;
+  margin: 20px 0;
+}
+.post-img {
+  max-width: 100%;
+  border-radius: 8px;
+  background: #f0f0f0;
+  min-height: 200px;
+}
+.img-caption {
+  font-size: 13px;
+  color: #888;
+  margin-top: 8px;
+}
+
+/* 视频 */
+.video-wrap {
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.video-wrap video {
+  width: 100%;
+  display: block;
+  background: #000;
+}
+
+/* ===== 剧透遮罩核心样式 ===== */
+.spoiler-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.spoiler-wrap.block {
+  display: block;
+}
+.spoiler-wrap .spoiler-content {
+  display: block;
+  filter: blur(8px);
+  transition: filter 0.3s ease;
+}
+.spoiler-wrap .spoiler-mask {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.spoiler-wrap .spoiler-hint {
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  padding: 8px 20px;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.spoiler-wrap:hover .spoiler-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+.spoiler-wrap.revealed .spoiler-mask {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.spoiler-wrap.revealed .spoiler-content {
+  filter: blur(0);
+}
+
+/* ===== 行内剧透：模糊，点一下揭开 ===== */
+.spoiler-inline {
+  filter: blur(4px);
+  cursor: pointer;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: rgba(233, 30, 99, 0.07);
+  user-select: none;
+  -webkit-user-select: none;
+  transition: filter 0.25s ease;
+}
+.spoiler-inline.revealed { filter: blur(0); }
+
+/* 文字剧透块内边距 */
+.spoiler-text-box {
+  padding: 18px 20px;
+  background: #faf3f5;
+  border: 1px dashed #e91e63;
+  border-radius: 8px;
+  color: #555;
+}
+
+/* 称呼 */
+.salutation {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin: 10px 0 15px;
+}
+
+/* 底部动作 */
+.article-footer {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px dashed #ddd;
+}
+.article-actions {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #888;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.action-item:hover { color: #e91e63; }
+.action-item.liked { color: #e91e63; }
+
+/* 响应式 */
+@media (max-width: 600px) {
+  .article-area { padding: 20px; }
+  .gif-img { width: 90px; height: 90px; }
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="container">
+  <div class="top-bar">
+    <a href="/" class="back-btn">&larr; 返回首页</a>
+    <div class="top-bar-right">
+      <a href="#">我的空间</a>
+      <a href="#">设置</a>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="article-area">
+      <div class="article-header">
+        <h1 class="article-title">生日快乐~</h1>
+        <div class="article-meta">
+          <span class="meta-author"><a href="#">千ni姐姐</a></span>
+          <span>2026年11月16日</span>
+        </div>
+      </div>
+
+      <div class="article-body">
+        <!-- 顶部GIF -->
+        <div class="gif-row">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+        </div>
+
+        <p>晚上好小猫~生日快乐呀！</p>
+        <p>这是我们一起度过的……第二个生日了！时间真的过得好快，眨眼又又过去一年了！</p>
+        <p>说实话……距离周年庆有点太近了，所以有点不知道该写什么喵。</p>
+        <p>但来都来了，还是扯点有的没的吧~</p>
+        <br>
+        <p>刚看了眼企鹅，没想到今天刚好是咱认识的第365天！也就是说自我上舰已经过去一年了！大概？</p>
+        <p>看着小猫从紫毛变成蓝粉小猫，真的感觉猫一直都在成长</p>
+        <p>直播越来越熟练了，<span class="spoiler-inline" title="点一下揭开">越来越会⭕️了喵！</span></p>
+        <p>猫一定要发大财啊我要看语晴2.0完全体</p>
+        <br>
+        <p>虽然是你的生日，但我也想许一个愿！</p>
+        <p>我想要更多的猫！想要更多的小语语晴喵！打卡啦摩托！</p>
+        <p>不知道你会想要些什么，所以向我许一个愿望吧，我都会尽量完成的~</p>
+        <br>
+        <p>新的一年会更好的！</p>
+
+        <!-- 底部GIF -->
+        <div class="gif-row">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+          <img src="gif01.gif" alt="gif" class="gif-img">
+        </div>
+      </div>
+
+      <div class="article-footer">
+        <div class="article-actions">
+          <div class="action-item" onclick="this.classList.toggle('liked');">
+            <span>&#10084;&#65039;</span>
+            <span>1117</span>
+          </div>
+          <div class="action-item" data-copy-url>
+            <span>&#11088;</span>
+            <span class="action-label">收藏</span>
+          </div>
+          <div class="action-item" data-copy-url>
+            <span>&#8599;&#65039;</span>
+            <span class="action-label">分享</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========== 1. 剧透遮罩 ========== */
+(function() {
+  document.addEventListener('click', function(e) {
+    const wrap = e.target.closest('.spoiler-wrap');
+    if (!wrap || wrap.classList.contains('revealed')) return;
+    wrap.classList.add('revealed');
+    const video = wrap.querySelector('video');
+    if (video) {
+      video.play().catch(function(){});
+      video.addEventListener('pause', function() {
+        if (!video.ended && video.currentTime > 0) video.play().catch(function(){});
+      });
+    }
+  });
+  document.addEventListener('selectstart', function(e) {
+    const wrap = e.target.closest('.spoiler-wrap');
+    if (wrap && !wrap.classList.contains('revealed')) e.preventDefault();
+  });
+})();
+
+/* ========== 2. 行内剧透：点一下揭开 ========== */
+(function() {
+  document.addEventListener('click', function(e) {
+    const span = e.target.closest('.spoiler-inline');
+    if (span) span.classList.toggle('revealed');
+  });
+})();
+
+/* ========== 3. 收藏 / 分享：复制本页链接 ========== */
+(function() {
+  const items = document.querySelectorAll('[data-copy-url]');
+  if (!items.length) return;
+
+  function flash(label, text) {
+    if (!label.dataset.origin) label.dataset.origin = label.textContent;
+    label.textContent = text;
+    clearTimeout(label._timer);
+    label._timer = setTimeout(function() {
+      label.textContent = label.dataset.origin;
+    }, 1600);
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function(resolve, reject) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy') ? resolve() : reject(new Error('execCommand failed'));
+      } catch (err) {
+        reject(err);
+      } finally {
+        document.body.removeChild(ta);
+      }
+    });
+  }
+
+  items.forEach(function(el) {
+    const label = el.querySelector('.action-label');
+    el.addEventListener('click', function() {
+      const url = location.href.split('#')[0];
+      copyText(url).then(function() {
+        flash(label, '已复制');
+      }).catch(function() {
+        flash(label, '复制失败');
+      });
+    });
+  });
+})();
+
+/* ========== 4. B站粉丝数 API（双源 fallback） ========== */
+(function() {
+  const CONFIG = {
+    uid:         '385294025',   // 沿用参考页 UID（2026-11-15 线上实测可取到粉丝数）
+    refreshSec:  30,
+    startMark:   '【api调用01开始】',
+    endMark:     '【api调用01结束】',
+    proxyUrl:    '/api/bili/fans?vmid=',
+    directUrl:   'https://api.bilibili.com/x/relation/stat?vmid='
+  };
+
+  function injectLiveSpan() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while (node = walker.nextNode()) {
+      const t = node.textContent;
+      if (t.includes(CONFIG.startMark) && t.includes(CONFIG.endMark)) {
+        const text   = node.textContent;
+        const s      = text.indexOf(CONFIG.startMark);
+        const e      = text.indexOf(CONFIG.endMark) + CONFIG.endMark.length;
+        const before = text.slice(0, s);
+        const after  = text.slice(e);
+        const parent = node.parentNode;
+
+        if (before) parent.insertBefore(document.createTextNode(before), node);
+
+        const live = document.createElement('span');
+        live.id = 'bili-fan-live';
+        live.style.color = '#00a1d6';
+        live.style.fontWeight = '600';
+        live.textContent = '加载中…';
+        parent.insertBefore(live, node);
+
+        if (after) parent.insertBefore(document.createTextNode(after), node);
+        parent.removeChild(node);
+
+        console.log('[BiliFan] 已注入 span');
+        return live;
+      }
+    }
+    return null;   // 正文未使用标记：静默跳过，不报错、不空转
+  }
+
+  async function fetchFans() {
+    const ts = Date.now();
+    const proxy = CONFIG.proxyUrl + CONFIG.uid + '&_t=' + ts;
+    const direct = CONFIG.directUrl + CONFIG.uid + '&_t=' + ts;
+
+    try {
+      console.log('[BiliFan] 尝试代理:', proxy);
+      const res = await fetch(proxy, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.code === 0) return data.data.follower;
+        throw new Error('代理返回 code=' + data.code);
+      }
+      if (res.status === 404) {
+        console.warn('[BiliFan] 代理 404，fallback 直连 B 站');
+      } else {
+        throw new Error('代理 HTTP ' + res.status);
+      }
+    } catch (err) {
+      console.warn('[BiliFan] 代理失败:', err.message);
+    }
+
+    try {
+      console.log('[BiliFan] 尝试直连:', direct);
+      const res = await fetch(direct, {
+        cache: 'no-store',
+        headers: {
+          'Referer': 'https://space.bilibili.com',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+      if (!res.ok) throw new Error('直连 HTTP ' + res.status);
+      const data = await res.json();
+      if (data.code === 0) return data.data.follower;
+      throw new Error('直连返回 code=' + data.code);
+    } catch (err) {
+      console.error('[BiliFan] 直连也失败:', err.message);
+      throw err;
+    }
+  }
+
+  function updateSpan(span, fans) {
+    span.textContent = String(fans);   // 只写数字：前后文字留在原段落里，避免整句重复
+    console.log('[BiliFan] 更新成功:', fans);
+  }
+
+  async function tick(span) {
+    try {
+      const fans = await fetchFans();
+      updateSpan(span, fans);
+    } catch (err) {
+      const span = document.getElementById('bili-fan-live');
+      if (span) span.textContent = '粉丝数获取失败';
+    }
+  }
+
+  const span = injectLiveSpan();
+  if (!span) return;
+
+  setTimeout(() => tick(span), 300);
+  let timer = setInterval(() => tick(span), CONFIG.refreshSec * 1000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearInterval(timer);
+      timer = null;
+    } else {
+      tick(span);
+      if (!timer) timer = setInterval(() => tick(span), CONFIG.refreshSec * 1000);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
